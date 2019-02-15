@@ -1,1 +1,4 @@
-from azure.servicebus.control_client import ServicBusService
+
+class ServiceBusCollector(object):
+    def __init__(self, client):
+        self.client = client
