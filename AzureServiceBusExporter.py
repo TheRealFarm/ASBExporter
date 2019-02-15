@@ -12,7 +12,9 @@ from msrestazure.azure_active_directory import AADTokenCredentials
 
 def main(creds, subscription_id):
     sb_client = ServiceBusClient.ServiceBusClient(creds, subscription_id)
-    sb_client.client.queues.list_by_namespace('svns-ServiceBus', 'svnsservicebus')
+    queues = sb_client.client.queues.list_by_namespace('svns-ServiceBus', 'svnsservicebus')
+    for q in queues:
+        print(q.name, q.count_details)
 
 def get_credentials(tenant_id, client_id, client_secret):
     authority_uri = '{0}/{1}'.format('https://login.microsoftonline.com', tenant_id)
@@ -30,6 +32,7 @@ if __name__ == "__main__":
     parser.add_argument('--client-secret' '-x', required=False, help='Client Secret for Azure AD Application')
     parser.add_argument('--subscription_id', '-s', required=False,help='Azure Subscripotion your resources reside in.')
     parser.add_argument('--tenant_id', '-t', required=False, help='Azure Tenant Id.')
+
     if not os.getenv('APP_CLIENT_SECRET'):
         raise RuntimeError('Client Secret not set')
     client_secret = os.getenv('APP_CLIENT_SECRET')
