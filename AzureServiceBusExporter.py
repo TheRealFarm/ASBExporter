@@ -10,11 +10,10 @@ from collector import ServiceBusCollector
 from client import ServiceBusClient
 from msrestazure.azure_active_directory import AADTokenCredentials
 
-def main(creds, subscription_id):
+def main(creds, subscription_id, namespace):
     sb_client = ServiceBusClient.ServiceBusClient(creds, subscription_id)
-    queues = sb_client.client.queues.list_by_namespace('svns-ServiceBus', 'svnsservicebus')
-    for q in queues:
-        print(q.name, q.count_details)
+    collector = ServiceBusCollector.ServiceBusCollector(sb_client, namespace) 
+    collector.collect()
 
 def get_credentials(tenant_id, client_id, client_secret):
     authority_uri = '{0}/{1}'.format('https://login.microsoftonline.com', tenant_id)
@@ -40,5 +39,6 @@ if __name__ == "__main__":
     client_id = os.getenv('AZURE_CLIENT_ID')
     creds = get_credentials(tenant_id, client_id, client_secret)
     subscription_id = os.getenv('AZURE_SUBSCRIPTION_ID')
+    namespace = 'svnsservicebus'
 
-    main(creds, subscription_id)
+    main(creds, subscription_id, namespace)
