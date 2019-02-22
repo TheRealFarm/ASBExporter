@@ -1,7 +1,9 @@
 from azure.mgmt.servicebus import ServiceBusManagementClient
+import logging
 
 class ServiceBusClient(object):
     def __init__(self, credentials, subscription_id, base_url=None):
+		self.logger = logging.getLogger()
         self.client = ServiceBusManagementClient(credentials, subscription_id, base_url)
 
     def list_all_namespaces(self):
@@ -17,4 +19,6 @@ class ServiceBusClient(object):
         return self.client.queues.list_by_namespace(resource_group, namespace)
 
     def get_queue(self, resource_group, namespace, queue_name):
-        return self.client.queues.get(resource_group, namespace, queue_name)
+		queues = self.client.queues.get(resource_group, namespace, queue_name)
+		self.logger.debug("Retrieving the following queues: {0}".format(queues))
+        return queues
