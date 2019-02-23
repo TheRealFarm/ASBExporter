@@ -1,5 +1,6 @@
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily
 from azure.mgmt.monitor.models import ErrorResponseException
+import logging
 
 class NamespaceCollector(object):
     namespace_labels = ('namespace')
@@ -19,7 +20,8 @@ class NamespaceCollector(object):
     }
     supported_aggregations = ['average', 'minimum', 'maximum', 'total', 'count']
 
-    def __init__(self, client, namespace, resource_group, premium=False):
+    def __init__(self, client, namespace, resource_group):
+        self.logger = logging.getLogger()
         self.client = client
         self.namespace = namespace
         self.resource_group = resource_group
@@ -32,7 +34,7 @@ class NamespaceCollector(object):
             premium = self.client.get_metrics(list(self.premium_namespace_metric_description.keys()))
             namespace_metric_dict.update(premium)
         except ErrorResponseException:
-            print("Namespace is not premium")
+            self.logger.error('{0} is not a premium namespace. Will not gather cpu/memory usage metrics.'.format(self.namespace))
         metrics = self.create_metrics(namespace_metric_dict)
         if metrics:
             namespace_metrics += metrics

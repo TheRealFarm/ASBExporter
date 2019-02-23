@@ -1,0 +1,4 @@
+azure_namespace: 'svnsservicebus'
+azure_resource_group: 'svns-ServiceBus'
+log_level: 'debug'
+log_dir: 'C:\\Logs'

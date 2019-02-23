@@ -1,4 +1,5 @@
 from prometheus_client.core import GaugeMetricFamily
+import logging
 
 class QueueCollector(object):
     queue_labels = ('queue_name', 'queue_namespace')
@@ -13,6 +14,7 @@ class QueueCollector(object):
     }
 
     def __init__(self, client, namespace, resource_group):
+        self.logger = logging.getLogger()
         self.client = client
         self.namespace = namespace
         self.resource_group = resource_group
@@ -21,8 +23,10 @@ class QueueCollector(object):
         queues = self.client.list_queues_by_namespace(self.resource_group, self.namespace)
         queue_metrics = [] 
         for queue in queues:
+            self.logger.debug('Creating metrics for queue {0}'.format(queue.name))
             metrics = self.create_metrics(queue)
             if metrics:
+                self.logger.debug('Appending the following metrics for queue {0}. {1}'.format(queue.name, metrics))
                 queue_metrics += metrics
         return queue_metrics
 
@@ -30,13 +34,17 @@ class QueueCollector(object):
         metrics = []
         for key in queue._attribute_map.keys():
             if key in self.queue_metric_description.keys():
+                val = getattr(queue,key)
+                self.logger.info('Updating queue metric {0} with value {1}'.format(self.queue_metric_description[key], val))
                 gauge = self.queue_metric_description[key]
-                gauge.add_metric([queue.name, self.namespace], getattr(queue, key))
+                gauge.add_metric([queue.name, self.namespace], val)
                 metrics.append(gauge)
             elif key == 'count_details':
                 for attr in getattr(queue,key)._attribute_map.keys():
+                    val = getattr(getattr(queue,key), attr)
+                    self.logger.info('Updating queue metric {0} with value {1}'.format(self.queue_metric_description[attr], val))
                     gauge = self.queue_metric_description[attr]
-                    gauge.add_metric([queue.name, self.namespace], getattr(getattr(queue,key), attr))
+                    gauge.add_metric([queue.name, self.namespace], val)
                     metrics.append(gauge)
         return metrics
 

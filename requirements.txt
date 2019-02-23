@@ -3,3 +3,4 @@ azure-mgmt-servicebus==0.5.3
 azure-mgmt-monitor==0.5.2 
 prometheus_client==0.3.1
 requests==2.20.0
+pyyaml==3.12
