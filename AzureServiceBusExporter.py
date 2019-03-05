@@ -1,5 +1,4 @@
 import time
-import requests
 import argparse
 import os
 import adal
@@ -10,15 +9,15 @@ from logging.handlers import RotatingFileHandler
 
 from prometheus_client import start_http_server
 from prometheus_client.core import REGISTRY
-from collector import ServiceBusCollector
-from client import ServiceBusClient
+from collector import ServiceBusCollector, NamespaceCollector, QueueCollector
+from client import ServiceBusClient, AzureMonitorClient
 from msrestazure.azure_active_directory import AADTokenCredentials
 from config import init_config
 
 def main(creds, config):
     logger = logging.getLogger()
     sb_client = ServiceBusClient.ServiceBusClient(creds, config.subscription_id)
-    collector = ServiceBusCollector.ServiceBusCollector(sb_client, config.namespace, creds, config.resource_group, config.subscription_id) 
+    collector = ServiceBusCollector.ServiceBusCollector(sb_client, config.namespace, creds, config.resource_group, config.subscription_id)
     try:
         REGISTRY.register(collector)
     except Exception as e:
@@ -42,7 +41,7 @@ def get_credentials(tenant_id, client_id, client_secret):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--client_id', '-c', required=False, help='Client ID for Azure AD Application')
-    parser.add_argument('--client_secret' '-x', required=False, help='Client Secret for Azure AD Application')
+    parser.add_argument('--client_secret', '-x', required=False, help='Client Secret for Azure AD Application')
     parser.add_argument('--subscription_id', '-s', required=False,help='Azure Subscripotion your resources reside in.')
     parser.add_argument('--tenant_id', '-t', required=False, help='Azure Tenant Id.')
     parser.add_argument('--resource_group', '-g', required=False, help='Resource group that the Service Bus namespace resides in')

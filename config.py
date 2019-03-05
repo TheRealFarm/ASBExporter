@@ -40,11 +40,9 @@ def init_config(script_dir, args):
             elif os.getenv(key):
                 config[key] = os.getenv(key)
             else:
-                attr = key.lower()[:6]
-                if attr == 'client_secret': # needed because of argparse
-                    attr += '_x'
+                attr = key.lower()[6:]
                 if hasattr(args, attr):
-                     config[key] = attr
+                    config[key] = getattr(args, attr)
                 else:
                     raise RuntimeError('{0} not in config.yaml, set in environment variables or passed as an argument'.format(key))
     
